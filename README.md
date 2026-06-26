@@ -65,7 +65,7 @@ submodules.
 ```sh
 git clone --recursive https://github.com/ricardooofnl/omp-dotenv
 cd omp-dotenv
-cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 cmake --build build
 ```
 
