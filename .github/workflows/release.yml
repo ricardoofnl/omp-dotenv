@@ -39,7 +39,7 @@ jobs:
         with:
           submodules: recursive
       - name: configure
-        run: cmake -B build -A Win32
+        run: cmake -B build -A Win32 -DCMAKE_POLICY_VERSION_MINIMUM=3.5
       - name: build
         run: cmake --build build --config Release
       - uses: actions/upload-artifact@v4
