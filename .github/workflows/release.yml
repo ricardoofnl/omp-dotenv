@@ -23,7 +23,9 @@ jobs:
       - name: install 32-bit toolchain
         run: sudo apt-get update && sudo apt-get install -y g++-multilib cmake
       - name: configure
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+        env:
+          CMAKE_POLICY_VERSION_MINIMUM: "3.5"
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
       - name: build
         run: cmake --build build --config Release
       - uses: actions/upload-artifact@v4
@@ -39,7 +41,9 @@ jobs:
         with:
           submodules: recursive
       - name: configure
-        run: cmake -B build -A Win32 -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+        env:
+          CMAKE_POLICY_VERSION_MINIMUM: "3.5"
+        run: cmake -B build -A Win32
       - name: build
         run: cmake --build build --config Release
       - uses: actions/upload-artifact@v4

@@ -65,11 +65,15 @@ submodules.
 ```sh
 git clone --recursive https://github.com/ricardooofnl/omp-dotenv
 cd omp-dotenv
-cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+CMAKE_POLICY_VERSION_MINIMUM=3.5 cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
 
 The output is `build/omp-dotenv.so`.
+
+The `CMAKE_POLICY_VERSION_MINIMUM` env var lets very new CMake configure the
+older bundled submodules. On Windows PowerShell, set it first:
+`$env:CMAKE_POLICY_VERSION_MINIMUM=3.5`, then `cmake -B build -A Win32`.
 
 On Arch Linux you need multilib (`lib32-gcc-libs`, `lib32-glibc`). On Debian or
 Ubuntu use `gcc-multilib g++-multilib`.
