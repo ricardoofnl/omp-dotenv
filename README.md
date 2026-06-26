@@ -63,7 +63,7 @@ Requires a 32-bit toolchain (open.mp servers are i386), CMake 3.19+, and the
 submodules.
 
 ```sh
-git clone --recursive https://github.com/ricardooofnl/omp-dotenv
+git clone --recursive https://github.com/ricardoofnl/omp-dotenv
 cd omp-dotenv
 CMAKE_POLICY_VERSION_MINIMUM=3.5 cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
