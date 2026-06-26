@@ -1,0 +1,9 @@
+[submodule "lib/omp-sdk"]
+	path = lib/omp-sdk
+	url = https://github.com/openmultiplayer/open.mp-sdk
+[submodule "lib/pawn"]
+	path = lib/pawn
+	url = https://github.com/openmultiplayer/compiler
+[submodule "lib/pawn-natives"]
+	path = lib/pawn-natives
+	url = https://github.com/Y-Less/pawn-natives
