@@ -1,6 +1,6 @@
 # omp-dotenv
 
-`.env` support for [open.mp](https://open.mp) — load configuration and secrets
+`.env` support for [open.mp](https://open.mp) load configuration and secrets
 from a `.env` file (and the OS environment) and read them from Pawn.
 
 Keep secrets like database keys out of your committed `.pwn` and `config.json`.
