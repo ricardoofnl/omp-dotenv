@@ -6,11 +6,9 @@
 
 #include "dotenv.hpp"
 
-// ---------------------------------------------------------------------------
-//  AMX string helpers
-// ---------------------------------------------------------------------------
 namespace
 {
+	// read a pawn string argument into a std::string
 	std::string AmxGetString(AMX* amx, cell param)
 	{
 		cell* addr = nullptr;
@@ -27,6 +25,7 @@ namespace
 		return out;
 	}
 
+	// write a std::string back into a pawn destination buffer
 	void AmxSetString(AMX* amx, cell param, const std::string& value, cell size)
 	{
 		cell* addr = nullptr;
@@ -36,17 +35,14 @@ namespace
 	}
 }
 
-// ---------------------------------------------------------------------------
-//  Natives
-// ---------------------------------------------------------------------------
-// native ENV_Load(const path[] = ".env");
+// load (or reload) a .env file
 static cell AMX_NATIVE_CALL n_ENV_Load(AMX* amx, const cell* params)
 {
 	const std::string path = AmxGetString(amx, params[1]);
 	return Dotenv::instance().load(path) ? 1 : 0;
 }
 
-// native ENV_Get(const key[], dest[], size = sizeof(dest), const fallback[] = "");
+// copy a value into dest, or the fallback when the key is missing
 static cell AMX_NATIVE_CALL n_ENV_Get(AMX* amx, const cell* params)
 {
 	const std::string key = AmxGetString(amx, params[1]);
@@ -56,7 +52,7 @@ static cell AMX_NATIVE_CALL n_ENV_Get(AMX* amx, const cell* params)
 	return static_cast<cell>(value.size());
 }
 
-// native ENV_GetInt(const key[], fallback = 0);
+// value parsed as an integer, or the fallback
 static cell AMX_NATIVE_CALL n_ENV_GetInt(AMX* amx, const cell* params)
 {
 	const std::string key = AmxGetString(amx, params[1]);
@@ -73,7 +69,7 @@ static cell AMX_NATIVE_CALL n_ENV_GetInt(AMX* amx, const cell* params)
 	}
 }
 
-// native Float:ENV_GetFloat(const key[], Float:fallback = 0.0);
+// value parsed as a float, or the fallback
 static cell AMX_NATIVE_CALL n_ENV_GetFloat(AMX* amx, const cell* params)
 {
 	const std::string key = AmxGetString(amx, params[1]);
@@ -92,7 +88,7 @@ static cell AMX_NATIVE_CALL n_ENV_GetFloat(AMX* amx, const cell* params)
 	return amx_ftoc(result);
 }
 
-// native bool:ENV_GetBool(const key[], bool:fallback = false);
+// value parsed as a bool, or the fallback
 static cell AMX_NATIVE_CALL n_ENV_GetBool(AMX* amx, const cell* params)
 {
 	const std::string key = AmxGetString(amx, params[1]);
@@ -111,7 +107,7 @@ static cell AMX_NATIVE_CALL n_ENV_GetBool(AMX* amx, const cell* params)
 	return params[2];
 }
 
-// native bool:ENV_Has(const key[]);
+// true if the key exists in the file or the os environment
 static cell AMX_NATIVE_CALL n_ENV_Has(AMX* amx, const cell* params)
 {
 	const std::string key = AmxGetString(amx, params[1]);
@@ -128,9 +124,7 @@ static const AMX_NATIVE_INFO kNatives[] = {
 	{ nullptr, nullptr },
 };
 
-// ---------------------------------------------------------------------------
-//  Component
-// ---------------------------------------------------------------------------
+// the open.mp component: loads .env and registers the natives
 class DotenvComponent final : public IComponent, public PawnEventHandler
 {
 public:
@@ -143,11 +137,11 @@ public:
 	void onLoad(ICore* c) override
 	{
 		core_ = c;
-		// .env lives in the server root (C++ file access isn't sandboxed).
+		// .env lives in the server root (c++ file access isn't sandboxed)
 		if (Dotenv::instance().load(".env"))
 			core_->printLn("omp-dotenv: loaded .env");
 		else
-			core_->printLn("omp-dotenv: no .env file found (OS environment still works)");
+			core_->printLn("omp-dotenv: no .env file found (os environment still works)");
 	}
 
 	void onInit(IComponentList* components) override
@@ -155,15 +149,17 @@ public:
 		pawn_ = components->queryComponent<IPawnComponent>();
 		if (pawn_)
 		{
+			// wire the amx api so amx_* calls route through the server
 			setAmxFunctions(pawn_->getAmxFunctions());
 			pawn_->getEventDispatcher().addEventHandler(this);
 		}
 		else if (core_)
 		{
-			core_->printLn("omp-dotenv: Pawn component not found, natives unavailable");
+			core_->printLn("omp-dotenv: pawn component not found, natives unavailable");
 		}
 	}
 
+	// register the natives on every loaded script
 	void onAmxLoad(IPawnScript& script) override
 	{
 		amx_Register(script.GetAMX(), kNatives, -1);

@@ -3,7 +3,7 @@
 `.env` support for [open.mp](https://open.mp) — load configuration and secrets
 from a `.env` file (and the OS environment) and read them from Pawn.
 
-Keep secrets like database keys out of your committed `.pwn`/`config.json`.
+Keep secrets like database keys out of your committed `.pwn` and `config.json`.
 
 ## Natives
 
@@ -18,14 +18,15 @@ native bool:ENV_GetBool(const key[], bool:fallback = false);
 native bool:ENV_Has(const key[]);
 ```
 
-Lookup order for every key: **`.env` file → OS environment variable → fallback**.
+Lookup order for every key: the `.env` file first, then an OS environment
+variable, then the fallback.
 
 ## Example
 
-`.env` (in the server root):
+`.env` in the server root:
 
 ```dotenv
-# comments and "export" prefixes are allowed
+# comments and an optional "export" prefix are allowed
 SUPABASE_URL=https://yourproject.supabase.co
 SUPABASE_KEY="eyJ..."
 MAX_PLAYERS=100
@@ -45,41 +46,44 @@ public OnGameModeInit()
 }
 ```
 
-## Install (server)
+## Install
 
-1. Build (see below) or grab a release `omp-dotenv.so` / `omp-dotenv.dll`.
-2. Put it in your server's `components/` folder.
-3. Put `include/omp-dotenv.inc` on your include path and `#include <omp-dotenv>`.
-4. Create a `.env` file in the server root.
+- Build it (see below) or download a release `omp-dotenv.so` / `omp-dotenv.dll`.
+- Put the binary in your server's `components/` folder (it auto-loads).
+- Put `include/omp-dotenv.inc` on your include path and `#include <omp-dotenv>`.
+- Create a `.env` file in the server root.
 
 The component auto-loads `.env` from the server root on startup. Unlike Pawn's
-own file functions (limited to `scriptfiles/`), this C++ component can read the
+own file functions (limited to `scriptfiles/`), this C++ component reads the
 root and also falls back to real OS environment variables.
 
 ## Build
 
-Requires a **32-bit** toolchain (open.mp servers are i386), CMake ≥ 3.19, and
-the submodules.
+Requires a 32-bit toolchain (open.mp servers are i386), CMake 3.19+, and the
+submodules.
 
 ```sh
-git clone --recursive https://github.com/<you>/omp-dotenv
+git clone --recursive https://github.com/ricardooofnl/omp-dotenv
 cd omp-dotenv
 cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
-# -> build/omp-dotenv.so
 ```
 
-On Arch Linux you need multilib (`lib32-gcc-libs`, `lib32-glibc`). On Debian/
-Ubuntu: `gcc-multilib g++-multilib`.
+The output is `build/omp-dotenv.so`.
 
-### Submodules
+On Arch Linux you need multilib (`lib32-gcc-libs`, `lib32-glibc`). On Debian or
+Ubuntu use `gcc-multilib g++-multilib`.
 
-| Path | Repo | Purpose |
-|------|------|---------|
-| `lib/omp-sdk` | openmultiplayer/open.mp-sdk | open.mp component SDK |
-| `lib/pawn` | openmultiplayer/compiler | `amx/amx.h` headers |
-| `lib/pawn-natives` | Y-Less/pawn-natives | used by the SDK's Pawn impl |
+## Test
+
+A sample Pawn gamemode is in `test/`.
+
+- Copy `test/sample.env` to your server root as `.env`.
+- Put `omp-dotenv.so` in `components/` and `omp-dotenv.inc` on the include path.
+- Compile `test/test.pwn` as the gamemode and run the server.
+
+The results are printed to the server console, ending with `X/X passed`.
 
 ## License
 
-MIT
+GNU General Public License v3.0. See [LICENSE](LICENSE).

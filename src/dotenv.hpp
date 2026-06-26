@@ -4,23 +4,19 @@
 #include <string>
 #include <unordered_map>
 
-// Loads and stores key/value pairs from a .env file. Lookups fall back to the
-// process environment (getenv) so the same API works for file values and real
-// OS environment variables (handy for Docker / hosting).
+// loads key/value pairs from a .env file, with a fallback to os environment
 class Dotenv
 {
 public:
 	static Dotenv& instance();
 
-	// Parse a .env file (KEY=VALUE per line, '#' comments, optional quotes).
-	// Returns false if the file could not be opened. Adds to / overrides the
-	// existing values.
+	// parse a .env file, returns false if it could not be opened
 	bool load(const std::string& path);
 
-	// value from the file, else from getenv, else std::nullopt.
+	// value from the file, else from getenv, else nullopt
 	std::optional<std::string> get(const std::string& key) const;
 
-	// True if the key exists in the file or the OS environment.
+	// true if the key exists in the file or the os environment
 	bool has(const std::string& key) const;
 
 private:

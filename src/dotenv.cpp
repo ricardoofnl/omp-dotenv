@@ -5,6 +5,7 @@
 
 namespace
 {
+	// strip leading and trailing whitespace
 	std::string trim(const std::string& s)
 	{
 		const char* ws = " \t\r\n";
@@ -15,7 +16,7 @@ namespace
 		return s.substr(begin, end - begin + 1);
 	}
 
-	// Remove a matching pair of surrounding single or double quotes.
+	// remove a matching pair of surrounding single or double quotes
 	std::string unquote(const std::string& s)
 	{
 		if (s.size() >= 2)
@@ -47,7 +48,7 @@ bool Dotenv::load(const std::string& path)
 		if (line.empty() || line[0] == '#')
 			continue;
 
-		// Allow an optional "export " prefix.
+		// allow an optional export prefix
 		if (line.rfind("export ", 0) == 0)
 			line = trim(line.substr(7));
 
@@ -69,6 +70,7 @@ std::optional<std::string> Dotenv::get(const std::string& key) const
 	if (it != values_.end())
 		return it->second;
 
+	// fall back to a real os environment variable
 	if (const char* env = std::getenv(key.c_str()))
 		return std::string(env);
 
