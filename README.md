@@ -1,9 +1,13 @@
 # omp-dotenv
 
-`.env` support for [open.mp](https://open.mp) load configuration and secrets
-from a `.env` file (and the OS environment) and read them from Pawn.
+`.env` support for [open.mp](https://open.mp) and legacy SA-MP: load
+configuration and secrets from a `.env` file (and the OS environment) and read
+them from Pawn.
 
 Keep secrets like database keys out of your committed `.pwn` and `config.json`.
+
+The same natives ship as an open.mp **component** and a SA-MP **plugin**, both
+built from this repo.
 
 ## Natives
 
@@ -48,13 +52,26 @@ public OnGameModeInit()
 
 ## Install
 
+Both builds use the same `include/omp-dotenv.inc` and the same `.env` file.
+
+### open.mp
+
 - Build it (see below) or download a release `omp-dotenv.so` / `omp-dotenv.dll`.
 - Put the binary in your server's `components/` folder (it auto-loads).
 - Put `include/omp-dotenv.inc` on your include path and `#include <omp-dotenv>`.
 - Create a `.env` file in the server root.
 
-The component auto-loads `.env` from the server root on startup. Unlike Pawn's
-own file functions (limited to `scriptfiles/`), this C++ component reads the
+### SA-MP (legacy)
+
+- Build it (see below) or download a release `dotenv.so` / `dotenv.dll`.
+- Put the binary in your server's `plugins/` folder.
+- Add `dotenv` to the `plugins` line in `server.cfg` (`plugins dotenv` on Linux,
+  `plugins dotenv.dll` on Windows).
+- Put `include/omp-dotenv.inc` on your include path and `#include <omp-dotenv>`.
+- Create a `.env` file in the server root.
+
+Either way the natives auto-load `.env` from the server root on startup. Unlike
+Pawn's own file functions (limited to `scriptfiles/`), this C++ code reads the
 root and also falls back to real OS environment variables.
 
 ## Build
@@ -69,7 +86,8 @@ CMAKE_POLICY_VERSION_MINIMUM=3.5 cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
 
-The output is `build/omp-dotenv.so`.
+This produces both binaries: `build/omp-dotenv.so` (open.mp component) and
+`build/dotenv.so` (SA-MP plugin).
 
 The `CMAKE_POLICY_VERSION_MINIMUM` env var lets very new CMake configure the
 older bundled submodules. On Windows PowerShell, set it first:
