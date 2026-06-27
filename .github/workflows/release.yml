@@ -55,7 +55,7 @@ jobs:
             build/Release/omp-dotenv.dll
             build/Release/dotenv.dll
 
-  # package include + components (open.mp) + plugins (sa-mp) into a zip and publish a release
+  # package a separate zip per platform (same .inc in both) and publish a release
   release:
     needs: [build-linux, build-windows]
     runs-on: ubuntu-latest
@@ -71,19 +71,23 @@ jobs:
           path: artifacts/windows
       - name: package
         run: |
-          mkdir -p package/include package/components package/plugins
-          cp include/omp-dotenv.inc package/include/
-          # open.mp component goes in components/
-          cp artifacts/linux/omp-dotenv.so package/components/
-          cp artifacts/windows/omp-dotenv.dll package/components/
-          # sa-mp legacy plugin goes in plugins/
-          cp artifacts/linux/dotenv.so package/plugins/
-          cp artifacts/windows/dotenv.dll package/plugins/
-          cd package
-          zip -r "../omp-dotenv-v${{ inputs.version }}.zip" include components plugins
+          # open.mp component -> components/, with the shared include
+          mkdir -p omp/include omp/components
+          cp include/omp-dotenv.inc omp/include/
+          cp artifacts/linux/omp-dotenv.so omp/components/
+          cp artifacts/windows/omp-dotenv.dll omp/components/
+          (cd omp && zip -r "../omp-dotenv-v${{ inputs.version }}.zip" include components)
+          # sa-mp legacy plugin -> plugins/, with the same shared include
+          mkdir -p samp/include samp/plugins
+          cp include/omp-dotenv.inc samp/include/
+          cp artifacts/linux/dotenv.so samp/plugins/
+          cp artifacts/windows/dotenv.dll samp/plugins/
+          (cd samp && zip -r "../samp-dotenv-v${{ inputs.version }}.zip" include plugins)
       - name: release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ inputs.version }}
           name: omp-dotenv v${{ inputs.version }}
-          files: omp-dotenv-v${{ inputs.version }}.zip
+          files: |
+            omp-dotenv-v${{ inputs.version }}.zip
+            samp-dotenv-v${{ inputs.version }}.zip
