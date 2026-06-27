@@ -31,7 +31,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: linux
-          path: build/omp-dotenv.so
+          path: |
+            build/omp-dotenv.so
+            build/dotenv.so
 
   # build the 32-bit windows .dll
   build-windows:
@@ -49,9 +51,11 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: windows
-          path: build/Release/omp-dotenv.dll
+          path: |
+            build/Release/omp-dotenv.dll
+            build/Release/dotenv.dll
 
-  # package include + components into a zip and publish a release
+  # package include + components (open.mp) + plugins (sa-mp) into a zip and publish a release
   release:
     needs: [build-linux, build-windows]
     runs-on: ubuntu-latest
@@ -67,12 +71,16 @@ jobs:
           path: artifacts/windows
       - name: package
         run: |
-          mkdir -p package/include package/components
+          mkdir -p package/include package/components package/plugins
           cp include/omp-dotenv.inc package/include/
+          # open.mp component goes in components/
           cp artifacts/linux/omp-dotenv.so package/components/
           cp artifacts/windows/omp-dotenv.dll package/components/
+          # sa-mp legacy plugin goes in plugins/
+          cp artifacts/linux/dotenv.so package/plugins/
+          cp artifacts/windows/dotenv.dll package/plugins/
           cd package
-          zip -r "../omp-dotenv-v${{ inputs.version }}.zip" include components
+          zip -r "../omp-dotenv-v${{ inputs.version }}.zip" include components plugins
       - name: release
         uses: softprops/action-gh-release@v2
         with:
